@@ -1,20 +1,16 @@
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 // program to implement queue data structure
 
 const getValue = (card) => {
-    //console.error(card)
     let val = card[0];
+
+    //Convoluted solution because I used the first character instead of splicing the last and forgot the case for "10" where we need 2 characters.
     if(val == 1) {
         if(card[1] == 0){
             val = "10"
         }
     }
-    const parsed = parseInt(val)
+    const parsed = parseInt(val);
     if(val === "10"){
-        console.error(val, parsed)
     }
     if (!isNaN(parsed)){
         return parsed;
@@ -27,6 +23,7 @@ const getValue = (card) => {
     } else if (val === "A"){
         return 14;
     }
+    // If there's a parsing error, we can just check the final decks and see errors showing up instead of numbers.
     else return 'error'
 };
 
@@ -40,7 +37,7 @@ class Queue {
         return this.items.push(...element);
     }
     
-    // remove element from the queue
+    // remove element from the queue / Return a false
     dequeue() {
         if(this.items.length > 0) {
             return this.items.shift();
@@ -69,25 +66,26 @@ class Queue {
     }
 }
 
-const war = (q1, q2, c1, c2) => {
+const war = (c1, c2) => {
+    // We go to war ! c1 are the cards from P1 that are currently in play, c2 are the cards from P2 that are currently in play.
     //Setting the 3 cards set aside + initial card together to be added to the deck later
     
-    
+    //local, temporary array containing the cards we use
     let cardsP1 = c1
-    cardsP1.push(q1.dequeue(), q1.dequeue(), q1.dequeue())
+    cardsP1.push(queueP1.dequeue(), queueP1.dequeue(), queueP1.dequeue())
     
     
     let cardsP2 = c2
-    cardsP2.push(q2.dequeue(), q2.dequeue(), q2.dequeue())
+    cardsP2.push(queueP2.dequeue(), queueP2.dequeue(), queueP2.dequeue())
     
 
-    const cardP1 = q1.dequeue();
-    const cardP2 = q2.dequeue();
+    const cardP1 = queueP1.dequeue();
+    const cardP2 = queueP2.dequeue();
     cardsP1.push(cardP1);
     cardsP2.push(cardP2);
     // PAT during a war
     if (cardsP1.includes(false) || cardsP2.includes(false)){
-        console.error('false found : ', cardsP1, cardsP2, rounds)
+        console.error('false found (PAT) : ', "cards in play player one : ", cardsP1, "cards in play player two : ", cardsP2, "at round ", rounds)
         console.log('PAT')
         playing = false;
     }
@@ -104,16 +102,16 @@ const war = (q1, q2, c1, c2) => {
 
             queueP2.enqueue([...cardsP1, ...cardsP2])
     } else {
-        c1.push(cardP1);
-        c2.push(cardP2);
         console.error('queued war')
-     war(q1, q2, c1, c2)
+
+        // We queue another war : we pass the temporary arrays as parameters to be bet in the next war.
+     war(cardsP1, cardsP2)
     }
 
     }
 }
 
-
+// We create our decks of cards
 let queueP1 = new Queue();
 let queueP2 = new Queue();
 
@@ -123,6 +121,7 @@ for (let i = 0; i < n; i++) {
     const cardp1 = readline(); // the n cards of player 1
     const cardValue = getValue(cardp1)
 
+    //We populate our deck for player 1.
     queueP1.enqueue([cardValue]);
 }
 const m = parseInt(readline()); // the number of cards for player 2
@@ -130,27 +129,20 @@ for (let i = 0; i < m; i++) {
     const cardp2 = readline(); // the m cards of player 2
     const cardValue = getValue(cardp2)
 
+    //We populate our deck for player 2.
     queueP2.enqueue([cardValue]);
 
 }
 var playing = true;
 var rounds = 0;
-console.error('queue p1', queueP1.items)
-console.error('queue p2', queueP2.items)
 const play = () => {
 
 while(playing){
-    //increment the number of rounds played
-
+    //remove the two cards we want to compare from each queue
     const cardP1 = queueP1.dequeue();
     const cardP2 = queueP2.dequeue();
 
-    // console.error('cardP1 : ', cardP1)
-    // console.error('cardP2 : ', cardP2)
-    // console.error ('win : ',cardP1>cardP2, cardP2>cardP1, rounds )
-
-
-
+    //if there's no more card (dequeue returns false), we set a winner
     if (cardP1 === false){
         console.log('2 '+rounds);
         playing = false;
@@ -159,23 +151,23 @@ while(playing){
         console.log('1 '+rounds);
         playing = false;
     }
-
+    //P1 wins a battle
     if (cardP1>cardP2){
         queueP1.enqueue([cardP1, cardP2])
-        console.error("P1 win, P1 size", queueP1.size())
 
     }
+    //P2 wins a battle
     else if (cardP2>cardP1){
         queueP2.enqueue([cardP1, cardP2])
-        console.error("P2 win, P2 size", queueP2.size())
     } else {
-        war(queueP1, queueP2, [cardP1],[cardP2])
+        // We have a war (possibly multiple, war is a recursive function)
+        war([cardP1],[cardP2])
     }
+    // The battle/war(s) are over
+
+    //We can increment the number of rounds played
     rounds+=1;
 }
 
 }
 play();
-
-// Write an answer using console.log()
-// To debug: console.error('Debug messages...');
