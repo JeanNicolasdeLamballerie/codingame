@@ -6,8 +6,7 @@
  * The inputs you are given are automatically updated according to your last actions.
  **/
 
-
-
+const readline : () => string = () => "0";
 // game loop
 //Solving with an array because it's more convenient. A direct object approach would most likely be more performant by removing steps.
 
